@@ -17,7 +17,7 @@
                             <p class="card-text">Penerbit : <?= $buku['penerbit']; ?></p>
                             <p class="card-text">Tahun Terbit : <?= $buku['tahun_terbit']; ?></p>
 
-                            <a href="" class="btn btn-warning">Ubah</a>
+                            <a href="/buku/ubah/<?= $buku['id_buku']; ?>" class="btn btn-warning">Ubah</a>
                             <!-- hapus buku -->
                             <form action="/buku/<?= $buku['id_buku']; ?>" method="post" class="d-inline">
                                 <?= csrf_field(); ?>

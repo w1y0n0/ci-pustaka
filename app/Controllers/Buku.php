@@ -128,4 +128,95 @@ class Buku extends BaseController
         return redirect()->to('/buku');
     }
 
+    // ubah data buku
+    public function ubah($id)
+    {
+        $data = [
+            'title'      => 'Form Ubah Data Buku',
+            'validation' => session()->getFlashdata('validation') ?? \Config\Services::validation(),
+            'buku'       => $this->BukuModel->getBuku($id)
+        ];
+
+        return view('buku/ubah', $data);
+    }
+
+    // update data buku
+    public function update($id)
+    {
+        // cek judul
+        $bukuLama = $this->BukuModel->getBuku($id);
+        if ($bukuLama['judul'] == $this->request->getVar('judul')) {
+            $rule_judul = 'required';
+        } else {
+            $rule_judul = 'required|is_unique[buku.judul]';
+            $bukuLama['judul'] = $this->request->getVar('judul');
+        }
+        // validasi input
+        if (!$this->validate([
+            'judul' => [
+                'rules'  => $rule_judul,
+                'errors' => [
+                    'required'  => '{field} buku harus diisi.',
+                    'is_unique' => '{field} buku sudah terdaftar.'
+                ]
+            ],
+            'pengarang' => [
+                'rules'  => 'required',
+                'errors' => [
+                    'required' => '{field} buku harus diisi.'
+                ]
+            ],
+            'penerbit' => [
+                'rules'  => 'required',
+                'errors' => [
+                    'required' => '{field} buku harus diisi.'
+                ]
+            ],
+            'tahun_terbit' => [
+                'rules'  => 'required|numeric|exact_length[4]',
+                'errors' => [
+                    'required'     => '{field} buku harus diisi.',
+                    'numeric'      => '{field} buku harus berupa angka.',
+                    'exact_length' => '{field} buku harus terdiri dari 4 karakter angka.'
+                ]
+            ],
+            'sampul' => [
+                'rules'  => 'uploaded[sampul]|max_size[sampul,1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
+                'errors' => [
+                    'uploaded' => 'Pilih gambar sampul buku terlebih dahulu.',
+                    'max_size' => 'Ukuran gambar terlalu besar. Maksimal 1MB.',
+                    'is_image' => 'Yang anda pilih bukan gambar.',
+                    'mime_in'  => 'Format gambar tidak sesuai. Hanya jpg, jpeg, png yang diperbolehkan.'
+                ]
+            ]
+        ])) {
+            $validation = \Config\Services::validation();
+            return redirect()->to('/buku/ubah/' . $id)->withInput()->with('validation', $validation);
+        }
+
+        // ambil gambar
+        $fileSampul = $this->request->getFile('sampul');
+        if ($fileSampul->getError() == 4) {
+            $namaSampul = $bukuLama['sampul'];
+        } else {
+            $fileSampul->move('img');
+            $namaSampul = $fileSampul->getName();
+            // hapus gambar lama
+            if ($bukuLama['sampul'] != 'default.png') {
+                unlink('img/' . $bukuLama['sampul']);
+            }
+        }
+
+        $this->BukuModel->save([
+            'id_buku'    => $id,
+            'judul'      => $this->request->getVar('judul'),
+            'pengarang'  => $this->request->getVar('pengarang'),
+            'penerbit'   => $this->request->getVar('penerbit'),
+            'tahun_terbit' => $this->request->getVar('tahun_terbit'),
+            'sampul'     => $namaSampul
+        ]);
+
+        session()->setFlashdata('pesan', 'Data berhasil diubah.');
+        return redirect()->to('/buku');
+    }
 }

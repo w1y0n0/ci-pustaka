@@ -14,8 +14,8 @@ $routes->get('/buku/tambah', 'Buku::tambah');
 $routes->post('/buku/simpan', 'Buku::simpan');
 // hapus buku
 $routes->delete('/buku/(:num)', 'Buku::hapus/$1');
-// edit buku
-$routes->get('/buku/edit/(:any)', 'Buku::edit/$1');
+// ubah buku
+$routes->get('/buku/ubah/(:any)', 'Buku::ubah/$1');
 // update buku
 $routes->post('/buku/update/(:any)', 'Buku::update/$1');
 // detail buku
