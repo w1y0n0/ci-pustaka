@@ -18,7 +18,12 @@
                             <p class="card-text">Tahun Terbit : <?= $buku['tahun_terbit']; ?></p>
 
                             <a href="" class="btn btn-warning">Ubah</a>
-                            <a href="" class="btn btn-danger">Hapus</a>
+                            <!-- hapus buku -->
+                            <form action="/buku/<?= $buku['id_buku']; ?>" method="post" class="d-inline">
+                                <?= csrf_field(); ?>
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus buku <?= $buku['judul']; ?> ?');">Hapus</button>
+                            </form>
                             <br><br>
                             <a href="/buku">Kembali ke Daftar Buku</a>
                         </div>

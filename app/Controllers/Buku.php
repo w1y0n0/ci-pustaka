@@ -110,4 +110,22 @@ class Buku extends BaseController
         session()->setFlashdata('pesan', 'Data berhasil ditambahkan.');
         return redirect()->to('/buku');
     }
+
+    // hapus data buku
+    public function hapus($id)
+    {
+        // cari gambar berdasarkan id
+        $buku = $this->BukuModel->getBuku($id);
+
+        // cek jika file gambarnya default.png
+        if ($buku['sampul'] != 'default.png') {
+            // hapus gambar
+            unlink('img/' . $buku['sampul']);
+        }
+
+        $this->BukuModel->delete($id);
+        session()->setFlashdata('pesan', 'Data berhasil dihapus.');
+        return redirect()->to('/buku');
+    }
+
 }

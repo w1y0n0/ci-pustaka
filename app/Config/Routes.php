@@ -6,7 +6,17 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 $routes->get('/', 'Pages::index');
+// daftar buku
 $routes->get('/buku', 'Buku::index');
+// tambah buku
 $routes->get('/buku/tambah', 'Buku::tambah');
+// simpan buku
 $routes->post('/buku/simpan', 'Buku::simpan');
+// hapus buku
+$routes->delete('/buku/(:num)', 'Buku::hapus/$1');
+// edit buku
+$routes->get('/buku/edit/(:any)', 'Buku::edit/$1');
+// update buku
+$routes->post('/buku/update/(:any)', 'Buku::update/$1');
+// detail buku
 $routes->get('/buku/(:any)', 'Buku::detail/$1');
