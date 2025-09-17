@@ -1,4 +1,5 @@
-<?= $this->extend('layout/header'); ?>
+<?= $this->extend('layout/template'); ?>
+
 <?= $this->section('content'); ?>
 <div class="container">
   <div class="row">
@@ -14,18 +15,18 @@
           </tr>
         </thead>
         <tbody>
-          <?php 
-            $i = 1;
-            foreach ($buku as $b) :
+          <?php
+          $i = 1;
+          foreach ($buku as $b) :
           ?>
-          <tr>
-            <th scope="row"><?= $i++; ?></th>
-            <td><img src="/img/<?= $b['sampul']; ?>" alt="sampul" class="sampul" width="100"></td>
-            <td><?= $b['judul']; ?></td>
-            <td>
-              <a href="/buku/<?= $b['id_buku']; ?>" class="btn btn-success">Detail</a>
-            </td>
-          </tr>
+            <tr>
+              <th scope="row"><?= $i++; ?></th>
+              <td><img src="/img/<?= $b['sampul']; ?>" alt="sampul" class="sampul" width="100"></td>
+              <td><?= $b['judul']; ?></td>
+              <td>
+                <a href="/buku/<?= $b['id_buku']; ?>" class="btn btn-success">Detail</a>
+              </td>
+            </tr>
           <?php endforeach; ?>
         </tbody>
       </table>
