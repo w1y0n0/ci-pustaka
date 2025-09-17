@@ -4,11 +4,11 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\BukuModel;
-use CodeIgniter\HTTP\ResponseInterface;
 
 class Buku extends BaseController
 {
     protected $BukuModel;
+
     public function __construct()
     {
         $this->BukuModel = new BukuModel();
@@ -18,7 +18,7 @@ class Buku extends BaseController
     {
         $data = [
             'title' => 'Daftar Buku',
-            'buku' => $this->BukuModel->getBuku()
+            'buku'  => $this->BukuModel->getBuku()
         ];
 
         return view('buku/index', $data);
@@ -28,10 +28,9 @@ class Buku extends BaseController
     {
         $data = [
             'title' => 'Detail Buku',
-            'buku' => $this->BukuModel->getBuku($id)
+            'buku'  => $this->BukuModel->getBuku($id)
         ];
 
-        // jika buku tidak ada di tabel
         if (empty($data['buku'])) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Judul buku ' . $id . ' tidak ditemukan.');
         }
@@ -42,8 +41,9 @@ class Buku extends BaseController
     public function tambah()
     {
         $data = [
-            'title' => 'Form Tambah Data Buku',
-            'validation' => \Config\Services::validation()
+            'title'      => 'Form Tambah Data Buku',
+            // ambil validation dari session kalau ada
+            'validation' => session()->getFlashdata('validation') ?? \Config\Services::validation()
         ];
 
         return view('buku/tambah', $data);
@@ -54,63 +54,60 @@ class Buku extends BaseController
         // validasi input
         if (!$this->validate([
             'judul' => [
-                'rules' => 'required|is_unique[buku.judul]',
+                'rules'  => 'required|is_unique[buku.judul]',
                 'errors' => [
-                    'required' => '{field} buku harus diisi.',
+                    'required'  => '{field} buku harus diisi.',
                     'is_unique' => '{field} buku sudah terdaftar.'
                 ]
             ],
             'pengarang' => [
-                'rules' => 'required',
+                'rules'  => 'required',
                 'errors' => [
                     'required' => '{field} buku harus diisi.'
                 ]
             ],
             'penerbit' => [
-                'rules' => 'required',
+                'rules'  => 'required',
                 'errors' => [
                     'required' => '{field} buku harus diisi.'
                 ]
             ],
             'tahun_terbit' => [
-                'rules' => 'required|numeric|exact_length[4]',
+                'rules'  => 'required|numeric|exact_length[4]',
                 'errors' => [
-                    'required' => '{field} buku harus diisi.',
-                    'numeric' => '{field} buku harus berupa angka.',
+                    'required'     => '{field} buku harus diisi.',
+                    'numeric'      => '{field} buku harus berupa angka.',
                     'exact_length' => '{field} buku harus terdiri dari 4 karakter angka.'
                 ]
             ],
             'sampul' => [
-                'rules' => 'uploaded[sampul]|max_size[sampul,1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
+                'rules'  => 'uploaded[sampul]|max_size[sampul,1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
                 'errors' => [
                     'uploaded' => 'Pilih gambar sampul buku terlebih dahulu.',
                     'max_size' => 'Ukuran gambar terlalu besar. Maksimal 1MB.',
                     'is_image' => 'Yang anda pilih bukan gambar.',
-                    'mime_in' => 'Format gambar tidak sesuai. Hanya jpg, jpeg, png yang diperbolehkan.'
+                    'mime_in'  => 'Format gambar tidak sesuai. Hanya jpg, jpeg, png yang diperbolehkan.'
                 ]
             ]
         ])) {
             $validation = \Config\Services::validation();
             return redirect()->to('/buku/tambah')->withInput()->with('validation', $validation);
-            // return redirect()->to('/buku/tambah')->withInput();
         }
 
         // ambil gambar
         $fileSampul = $this->request->getFile('sampul');
-        // pindahkan ke folder img
         $fileSampul->move('img');
-        // ambil nama file
         $namaSampul = $fileSampul->getName();
 
         $this->BukuModel->save([
-            'judul' => $this->request->getVar('judul'),
-            'pengarang' => $this->request->getVar('pengarang'),
-            'penerbit' => $this->request->getVar('penerbit'),
+            'judul'       => $this->request->getVar('judul'),
+            'pengarang'   => $this->request->getVar('pengarang'),
+            'penerbit'    => $this->request->getVar('penerbit'),
             'tahun_terbit' => $this->request->getVar('tahun_terbit'),
-            'sampul' => $namaSampul
+            'sampul'      => $namaSampul
         ]);
+
         session()->setFlashdata('pesan', 'Data berhasil ditambahkan.');
         return redirect()->to('/buku');
     }
-
 }
