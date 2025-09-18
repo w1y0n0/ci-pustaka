@@ -4,7 +4,7 @@
 <div class="container">
   <div class="row">
     <div class="col">
-      <h1>Daftar Buku</h1>
+      <h1><?= $title; ?></h1>
       <!-- session flash data -->
       <?php if (session()->getFlashdata('pesan')) : ?>
         <div class="alert alert-success" role="alert">

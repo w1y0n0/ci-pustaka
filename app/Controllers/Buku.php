@@ -41,7 +41,7 @@ class Buku extends BaseController
     public function tambah()
     {
         $data = [
-            'title'      => 'Form Tambah Data Buku',
+            'title'      => 'Tambah Data Buku',
             'validation' => \Config\Services::validation()
         ];
 
@@ -88,7 +88,7 @@ class Buku extends BaseController
                 ]
             ]
         ])) {
-            $validation = \Config\Services::validation();
+            session()->setFlashdata('failed', 'Data buku gagal ditambahkan.');
             return redirect()->to('/buku/tambah')->withInput();
         }
 
@@ -137,7 +137,7 @@ class Buku extends BaseController
     public function ubah($id)
     {
         $data = [
-            'title'      => 'Form Ubah Data Buku',
+            'title'      => 'Ubah Data Buku',
             'validation' => \Config\Services::validation(),
             'buku'       => $this->BukuModel->getBuku($id)
         ];
@@ -194,8 +194,8 @@ class Buku extends BaseController
                 ]
             ]
         ])) {
-            // $validation = \Config\Services::validation();
-            return redirect()->to('/buku/ubah/' . $id)->withInput()->with('validation', $this->validator);;
+            session()->setFlashdata('failed', 'Data buku gagal diubah.');
+            return redirect()->to('/buku/ubah/' . $id)->withInput();
         }
 
         // ambil gambar

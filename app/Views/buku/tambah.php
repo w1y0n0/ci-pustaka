@@ -4,7 +4,13 @@
 <div class="container">
     <div class="col">
         <div class="row">
-            <h1>Form Tambah Data Buku</h1>
+            <h1><?= $title; ?></h1>
+            <!-- session flash data -->
+            <?php if (session()->getFlashdata('failed')) : ?>
+                <div class="alert alert-danger" role="alert">
+                    <?= session()->getFlashdata('failed'); ?>
+                </div>
+            <?php endif; ?>
             <form action="/buku/simpan" method="post" class="mt-4" enctype="multipart/form-data">
                 <?= csrf_field(); ?>
 
@@ -87,6 +93,7 @@
                     <label class="col-sm-2 col-form-label"></label>
                     <div class="col-sm-10">
                         <button type="submit" class="btn btn-primary">Tambah Data</button>
+                        <a href="/buku" class="btn btn-secondary">Kembali</a>
                     </div>
                 </div>
             </form>

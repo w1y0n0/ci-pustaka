@@ -4,7 +4,13 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            <h3 class="mt-2 mb-4">Ubah Data Buku</h3>
+            <h3 class="mt-2 mb-4"><?= $title; ?></h3>
+            <!-- session flash data -->
+            <?php if (session()->getFlashdata('failed')) : ?>
+                <div class="alert alert-danger" role="alert">
+                    <?= session()->getFlashdata('failed'); ?>
+                </div>
+            <?php endif; ?>
             <form action="/buku/update/<?= $buku['id_buku']; ?>" method="post" enctype="multipart/form-data">
                 <?= csrf_field(); ?>
                 <input type="hidden" name="sampulLama" value="<?= $buku['sampul']; ?>">

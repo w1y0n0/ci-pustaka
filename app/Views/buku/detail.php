@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            <h3 class="mt-2">Detail Buku</h3>
+            <h3 class="mt-2"><?= $title; ?></h3>
             <div class="card mb-3" style="max-width: 540px;">
                 <div class="row g-0">
                     <div class="col-md-4">
