@@ -42,8 +42,7 @@ class Buku extends BaseController
     {
         $data = [
             'title'      => 'Form Tambah Data Buku',
-            // ambil validation dari session kalau ada
-            'validation' => session()->getFlashdata('validation') ?? \Config\Services::validation()
+            'validation' => \Config\Services::validation()
         ];
 
         return view('buku/tambah', $data);
@@ -81,9 +80,8 @@ class Buku extends BaseController
                 ]
             ],
             'sampul' => [
-                'rules'  => 'uploaded[sampul]|max_size[sampul,1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
+                'rules'  => 'max_size[sampul,1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
                 'errors' => [
-                    'uploaded' => 'Pilih gambar sampul buku terlebih dahulu.',
                     'max_size' => 'Ukuran gambar terlalu besar. Maksimal 1MB.',
                     'is_image' => 'Yang anda pilih bukan gambar.',
                     'mime_in'  => 'Format gambar tidak sesuai. Hanya jpg, jpeg, png yang diperbolehkan.'
@@ -91,13 +89,20 @@ class Buku extends BaseController
             ]
         ])) {
             $validation = \Config\Services::validation();
-            return redirect()->to('/buku/tambah')->withInput()->with('validation', $validation);
+            return redirect()->to('/buku/tambah')->withInput();
         }
 
         // ambil gambar
         $fileSampul = $this->request->getFile('sampul');
-        $fileSampul->move('img');
-        $namaSampul = $fileSampul->getName();
+
+        if ($fileSampul->getError() == 4) {
+            // tidak upload gambar
+            $namaSampul = 'default.png';
+        } else {
+            // upload gambar baru
+            $fileSampul->move('img');
+            $namaSampul = $fileSampul->getName();
+        }
 
         $this->BukuModel->save([
             'judul'       => $this->request->getVar('judul'),
@@ -133,7 +138,7 @@ class Buku extends BaseController
     {
         $data = [
             'title'      => 'Form Ubah Data Buku',
-            'validation' => session()->getFlashdata('validation') ?? \Config\Services::validation(),
+            'validation' => \Config\Services::validation(),
             'buku'       => $this->BukuModel->getBuku($id)
         ];
 
@@ -145,11 +150,11 @@ class Buku extends BaseController
     {
         // cek judul
         $bukuLama = $this->BukuModel->getBuku($id);
+
         if ($bukuLama['judul'] == $this->request->getVar('judul')) {
             $rule_judul = 'required';
         } else {
             $rule_judul = 'required|is_unique[buku.judul]';
-            $bukuLama['judul'] = $this->request->getVar('judul');
         }
         // validasi input
         if (!$this->validate([
@@ -181,27 +186,29 @@ class Buku extends BaseController
                 ]
             ],
             'sampul' => [
-                'rules'  => 'uploaded[sampul]|max_size[sampul,1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
+                'rules'  => 'if_exist|max_size[sampul,1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
                 'errors' => [
-                    'uploaded' => 'Pilih gambar sampul buku terlebih dahulu.',
                     'max_size' => 'Ukuran gambar terlalu besar. Maksimal 1MB.',
                     'is_image' => 'Yang anda pilih bukan gambar.',
                     'mime_in'  => 'Format gambar tidak sesuai. Hanya jpg, jpeg, png yang diperbolehkan.'
                 ]
             ]
         ])) {
-            $validation = \Config\Services::validation();
-            return redirect()->to('/buku/ubah/' . $id)->withInput()->with('validation', $validation);
+            // $validation = \Config\Services::validation();
+            return redirect()->to('/buku/ubah/' . $id)->withInput()->with('validation', $this->validator);;
         }
 
         // ambil gambar
         $fileSampul = $this->request->getFile('sampul');
         if ($fileSampul->getError() == 4) {
+            // tidak upload gambar baru → pakai yang lama
             $namaSampul = $bukuLama['sampul'];
         } else {
+            // upload gambar baru
             $fileSampul->move('img');
             $namaSampul = $fileSampul->getName();
-            // hapus gambar lama
+
+            // hapus gambar lama (jika bukan default)
             if ($bukuLama['sampul'] != 'default.png') {
                 unlink('img/' . $bukuLama['sampul']);
             }
@@ -218,5 +225,38 @@ class Buku extends BaseController
 
         session()->setFlashdata('pesan', 'Data berhasil diubah.');
         return redirect()->to('/buku');
+    }
+
+    public function form_add()
+    {
+        $data = [
+            'title' => 'Form Add Data Buku',
+            'validation' => \Config\Services::validation()
+        ];
+
+        return view('buku/form_add', $data);
+    }
+
+    public function create_buku()
+    {
+        // rules validasi input
+        $rules = [
+            'judul' => 'required',
+            'pengarang' => 'required',
+            // 'penerbit' => 'required',
+            // 'tahun_terbit' => 'required|numeric|exact_length[4]',
+            // 'sampul' => 'uploaded[sampul]|max_size[sampul,1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]'
+        ];
+
+        $data = [
+            'judul' => $this->request->getVar('judul'),
+            'pengarang' => $this->request->getVar('pengarang'),
+        ];
+
+        // jika validasi gagal
+        if (! $this->validateData($data, $rules)) {
+            session()->setFlashdata('failed', 'Data buku gagal ditambahkan. Silakan periksa kembali inputan Anda.');
+            return redirect()->back()->withInput();
+        }
     }
 }
